@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: KyberNetworkProxy
@@ -13,7 +13,6 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        # - ExecuteTrade
         - KyberNetworkSet
         - TokenWithdraw
         - EtherWithdraw
@@ -23,10 +22,8 @@ dataSources:
         - OperatorAdded
       abis:
         - name: KyberNetworkProxy
-          file: ./abis/KyberNetworkProxy.json
+          file: KyberNetworkProxy/abis/KyberNetworkProxy.json
       eventHandlers:
-        # - event: ExecuteTrade(indexed address,address,address,uint256,uint256)
-        #   handler: handleExecuteTrade
         - event: KyberNetworkSet(address,address)
           handler: handleKyberNetworkSet
         - event: TokenWithdraw(address,uint256,address)
@@ -41,7 +38,7 @@ dataSources:
           handler: handleAlerterAdded
         - event: OperatorAdded(address,bool)
           handler: handleOperatorAdded
-      file: ./src/KyberNetworkProxy.ts
+      file: KyberNetworkProxy/KyberNetworkProxy.wasm
   - kind: ethereum/contract
     name: KyberNetwork
     network: mainnet
@@ -55,11 +52,10 @@ dataSources:
       entities:
         - AddReserveToNetwork
         - ListReservePairs
-        # - KyberTrade
         - EtherReceival
       abis:
         - name: KyberNetwork
-          file: ./abis/KyberNetwork.json
+          file: KyberNetwork/abis/KyberNetwork.json
       eventHandlers:
         - event: AddReserveToNetwork(indexed address,bool,bool)
           handler: handleAddReserveToNetwork
@@ -67,9 +63,7 @@ dataSources:
           handler: handleListReservePairs
         - event: EtherReceival(indexed address,uint256)
           handler: handleEtherReceival
-        # - event: KyberTrade(indexed address,address,address,uint256,uint256,address,uint256,address,address,bytes)
-        #   handler: handleKyberTrade
-      file: ./src/KyberNetwork.ts
+      file: KyberNetwork/KyberNetwork.wasm
 templates:
   - name: KyberReserve
     kind: ethereum/contract
@@ -80,12 +74,12 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.1
       language: wasm/assemblyscript
-      file: ./src/KyberReserve.ts
+      file: templates/KyberReserve/KyberReserve.wasm
       entities:
         - KyberReserve
       abis:
         - name: KyberReserve
-          file: ./abis/KyberReserve.json
+          file: KyberReserve/abis/KyberReserve.json
       eventHandlers:
         - event: DepositToken(address,uint256)
           handler: handleDepositToken
@@ -98,12 +92,12 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.1
       language: wasm/assemblyscript
-      file: ./src/OrderbookReserve.ts
+      file: templates/OrderbookReserve/OrderbookReserve.wasm
       entities:
         - OrderbookReserve
       abis:
         - name: OrderbookReserve
-          file: ./abis/OrderbookReserve.json
+          file: OrderbookReserve/abis/OrderbookReserve.json
       eventHandlers:
         - event: TokenDeposited(indexed address,uint256)
           handler: handleTokenDeposited
