@@ -11,7 +11,7 @@ import {
 } from "../generated/templates/KyberReserve/KyberReserve"
 import {
   OrderbookReserve
-} from "../generated/templates"
+} from "../generated/templates/OrderbookReserve/OrderbookReserve"
 import {
   tokenReserve,
   getKyberTrades,
@@ -47,7 +47,7 @@ export function handleAddReserveToNetwork(event: AddReserveToNetwork): void {
   // Entity fields can be set based on event parameters
   entity.reserveAddress = event.params.reserve
 
-  KyberReserve.create(event.params.reserve)
+  //KyberReserve.create(event.params.reserve)
 
   //let contract1 = KyberReserve.bind(event.params.reserve)
   let contract2 = OrderbookReserve.bind(event.params.reserve)
