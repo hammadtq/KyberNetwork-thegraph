@@ -60,6 +60,10 @@ dataSources:
       abis:
         - name: KyberNetwork
           file: ./abis/KyberNetwork.json
+        - name: KyberReserve
+          file: ./abis/KyberReserve.json
+        - name: OrderbookReserve
+          file: ./abis/OrderbookReserve.json
       eventHandlers:
         - event: AddReserveToNetwork(indexed address,bool,bool)
           handler: handleAddReserveToNetwork

@@ -8,10 +8,10 @@ import {
 } from "../generated/KyberNetwork/KyberNetwork"
 import {
   KyberReserve
-} from "../generated/templates/KyberReserve/KyberReserve"
+} from "../generated/KyberNetwork/KyberReserve"
 import {
   OrderbookReserve
-} from "../generated/templates/OrderbookReserve/OrderbookReserve"
+} from "../generated/KyberNetwork/OrderbookReserve"
 import {
   tokenReserve,
   getKyberTrades,
