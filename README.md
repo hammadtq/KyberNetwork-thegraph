@@ -8,4 +8,4 @@ The subgraph can easily be extended to other Kyber reserve types once a [issue](
 
 The information gathered by this subgraph is now being used in a live website called [dSwaps.com](http://dswaps.com)
 
-You can also add these stats and other useful information from Kyber by using API endpoints given [here](https://thegraph.com/explorer/subgraph/hammadtq/kybernetwork).
+You can also add these stats and other useful information from Kyber by using GraphQL supported API endpoints given [here](https://thegraph.com/explorer/subgraph/hammadtq/kybernetwork).
