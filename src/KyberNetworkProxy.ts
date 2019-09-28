@@ -10,7 +10,7 @@ import {
   AlerterAdded,
   OperatorAdded
 } from "../generated/KyberNetworkProxy/KyberNetworkProxy"
-import { ExampleEntity } from "../generated/schema"
+//import { ExampleEntity } from "../generated/schema"
 
 // export function handleExecuteTrade(event: ExecuteTrade): void {
 //   // Entities can be loaded from the store using a string ID; this ID

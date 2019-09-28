@@ -1,33 +1,16 @@
-type ExampleEntity @entity {
-  id: ID!
-  count: BigInt!
-  trader: Bytes! # address
-  src: Bytes! # address
+type kyberReserve @entity {
+    id: ID! # Reserve Address
+    reserveCount: Int!
+    kyberTotalTokenDeposited: BigDecimal
+    kyberTotalEtherDeposited: BigDecimal
 }
 
 type tokenReserve @entity {
   id: ID!
-  count: BigInt!
-  reserveAddress: Bytes #address
   tokenAddress: Bytes #address
   tokenName: String
-}
-
-type getEtherReceival @entity {
-  id: ID!
-  count: BigInt!
-  sender: Bytes! # address
-  amount: BigInt! # uint256
-}
-
-type getKyberTrades @entity {
-  id: ID!
-  count: BigInt!
-  traderAddress: Bytes! # address
-}
-
-type getListReserves @entity {
-  id: ID!
-  count: BigInt!
-  source: Bytes! # address
+  tokenSymbol: String
+  startTime: Int
+  totalTokenDeposited: BigDecimal
+  totalEtherDeposited: BigDecimal
 }

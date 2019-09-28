@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ExampleEntity extends Entity {
+export class kyberReserve extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,17 @@ export class ExampleEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ExampleEntity entity without an ID");
+    assert(id !== null, "Cannot save kyberReserve entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ExampleEntity entity with non-string ID. " +
+      "Cannot save kyberReserve entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ExampleEntity", id.toString(), this);
+    store.set("kyberReserve", id.toString(), this);
   }
 
-  static load(id: string): ExampleEntity | null {
-    return store.get("ExampleEntity", id) as ExampleEntity | null;
+  static load(id: string): kyberReserve | null {
+    return store.get("kyberReserve", id) as kyberReserve | null;
   }
 
   get id(): string {
@@ -42,31 +42,53 @@ export class ExampleEntity extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
+  get reserveCount(): i32 {
+    let value = this.get("reserveCount");
+    return value.toI32();
   }
 
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
+  set reserveCount(value: i32) {
+    this.set("reserveCount", Value.fromI32(value));
   }
 
-  get trader(): Bytes {
-    let value = this.get("trader");
-    return value.toBytes();
+  get kyberTotalTokenDeposited(): BigDecimal | null {
+    let value = this.get("kyberTotalTokenDeposited");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigDecimal();
+    }
   }
 
-  set trader(value: Bytes) {
-    this.set("trader", Value.fromBytes(value));
+  set kyberTotalTokenDeposited(value: BigDecimal | null) {
+    if (value === null) {
+      this.unset("kyberTotalTokenDeposited");
+    } else {
+      this.set(
+        "kyberTotalTokenDeposited",
+        Value.fromBigDecimal(value as BigDecimal)
+      );
+    }
   }
 
-  get src(): Bytes {
-    let value = this.get("src");
-    return value.toBytes();
+  get kyberTotalEtherDeposited(): BigDecimal | null {
+    let value = this.get("kyberTotalEtherDeposited");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigDecimal();
+    }
   }
 
-  set src(value: Bytes) {
-    this.set("src", Value.fromBytes(value));
+  set kyberTotalEtherDeposited(value: BigDecimal | null) {
+    if (value === null) {
+      this.unset("kyberTotalEtherDeposited");
+    } else {
+      this.set(
+        "kyberTotalEtherDeposited",
+        Value.fromBigDecimal(value as BigDecimal)
+      );
+    }
   }
 }
 
@@ -98,32 +120,6 @@ export class tokenReserve extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
-  }
-
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
-  }
-
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
-  get reserveAddress(): Bytes | null {
-    let value = this.get("reserveAddress");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set reserveAddress(value: Bytes | null) {
-    if (value === null) {
-      this.unset("reserveAddress");
-    } else {
-      this.set("reserveAddress", Value.fromBytes(value as Bytes));
-    }
   }
 
   get tokenAddress(): Bytes | null {
@@ -159,160 +155,70 @@ export class tokenReserve extends Entity {
       this.set("tokenName", Value.fromString(value as string));
     }
   }
-}
 
-export class getEtherReceival extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
+  get tokenSymbol(): string | null {
+    let value = this.get("tokenSymbol");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save getEtherReceival entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save getEtherReceival entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("getEtherReceival", id.toString(), this);
+  set tokenSymbol(value: string | null) {
+    if (value === null) {
+      this.unset("tokenSymbol");
+    } else {
+      this.set("tokenSymbol", Value.fromString(value as string));
+    }
   }
 
-  static load(id: string): getEtherReceival | null {
-    return store.get("getEtherReceival", id) as getEtherReceival | null;
+  get startTime(): i32 {
+    let value = this.get("startTime");
+    return value.toI32();
   }
 
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
+  set startTime(value: i32) {
+    this.set("startTime", Value.fromI32(value));
   }
 
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
+  get totalTokenDeposited(): BigDecimal | null {
+    let value = this.get("totalTokenDeposited");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigDecimal();
+    }
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
+  set totalTokenDeposited(value: BigDecimal | null) {
+    if (value === null) {
+      this.unset("totalTokenDeposited");
+    } else {
+      this.set(
+        "totalTokenDeposited",
+        Value.fromBigDecimal(value as BigDecimal)
+      );
+    }
   }
 
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
+  get totalEtherDeposited(): BigDecimal | null {
+    let value = this.get("totalEtherDeposited");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigDecimal();
+    }
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
-    return value.toBytes();
-  }
-
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
-  }
-
-  get amount(): BigInt {
-    let value = this.get("amount");
-    return value.toBigInt();
-  }
-
-  set amount(value: BigInt) {
-    this.set("amount", Value.fromBigInt(value));
-  }
-}
-
-export class getKyberTrades extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save getKyberTrades entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save getKyberTrades entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("getKyberTrades", id.toString(), this);
-  }
-
-  static load(id: string): getKyberTrades | null {
-    return store.get("getKyberTrades", id) as getKyberTrades | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
-  }
-
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
-  get traderAddress(): Bytes {
-    let value = this.get("traderAddress");
-    return value.toBytes();
-  }
-
-  set traderAddress(value: Bytes) {
-    this.set("traderAddress", Value.fromBytes(value));
-  }
-}
-
-export class getListReserves extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save getListReserves entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save getListReserves entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("getListReserves", id.toString(), this);
-  }
-
-  static load(id: string): getListReserves | null {
-    return store.get("getListReserves", id) as getListReserves | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
-  }
-
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
-  get source(): Bytes {
-    let value = this.get("source");
-    return value.toBytes();
-  }
-
-  set source(value: Bytes) {
-    this.set("source", Value.fromBytes(value));
+  set totalEtherDeposited(value: BigDecimal | null) {
+    if (value === null) {
+      this.unset("totalEtherDeposited");
+    } else {
+      this.set(
+        "totalEtherDeposited",
+        Value.fromBigDecimal(value as BigDecimal)
+      );
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt, log, Address, BigDecimal } from "@graphprotocol/graph-ts"
 import {
   KyberNetwork,
   AddReserveToNetwork,
@@ -9,101 +9,127 @@ import {
 import {
   KyberReserve
 } from "../generated/KyberNetwork/KyberReserve"
+import { OrderbookReserve } from "../generated/KyberNetwork/OrderbookReserve"
+import { ERC20 } from "../generated/KyberNetwork/ERC20"
+import { ERC20_bytes32 } from "../generated/KyberNetwork/ERC20_bytes32"
+import { OrderbookReserve as OrderbookReserveTemplate } from "../generated/templates"
 import {
-  OrderbookReserve
-} from "../generated/KyberNetwork/OrderbookReserve"
-import {
-  tokenReserve,
-  getKyberTrades,
-  getListReserves,
-  getEtherReceival
+  kyberReserve,
+  tokenReserve
 } from "../generated/schema"
 
 export function handleAddReserveToNetwork(event: AddReserveToNetwork): void {
-  log.error(
-    'I am in the dark {}{}{}',
-    [
-      event.block.number.toString(),       // "47596000"
-      event.block.hash.toHexString(),      // "0x..."
-      event.transaction.hash.toHexString() // "0x..."
-    ]
-  )
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = tokenReserve.load(event.transaction.from.toHex())
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new tokenReserve(event.transaction.from.toHex())
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+  if(event.params.isPermissionless){
+    // log.error(
+    //   'I am in the AddReserveToNetwork {}{}{}',
+    //   [
+    //     event.block.number.toString(),       // "47596000"
+    //     event.block.hash.toHexString(),      // "0x..."
+    //     event.transaction.hash.toHexString() // "0x..."
+    //   ]
+    // )
+    // Entities can be loaded from the store using a string ID; this ID
+    // needs to be unique across all entities of the same type
+
+    let kyberReservesEntity = kyberReserve.load('1')
+
+
+    if (kyberReservesEntity == null) {
+      kyberReservesEntity = new kyberReserve('1')
+      // Entity fields can be set using simple assignments
+      kyberReservesEntity.reserveCount = 0
+      kyberReservesEntity.kyberTotalTokenDeposited = BigDecimal.fromString('0')
+      kyberReservesEntity.kyberTotalEtherDeposited = BigDecimal.fromString('0')
+    }
+    kyberReservesEntity.reserveCount = kyberReservesEntity.reserveCount + 1
+
+
+    let entity = tokenReserve.load(event.params.reserve.toHexString())
+
+
+    if (entity == null) {
+      entity = new tokenReserve(event.params.reserve.toHexString())
+      entity.startTime = event.block.timestamp.toI32()
+      entity.totalTokenDeposited = BigDecimal.fromString('0')
+      entity.totalEtherDeposited = BigDecimal.fromString('0')
+    }
+
+
+
+    let contract2 = OrderbookReserve.bind(event.params.reserve)
+    let result2 = contract2.try_contracts()
+    let tokenAddress = result2.value.value1.toHex()
+    entity.tokenAddress = result2.value.value1
+
+       log.error("Permissionless Reserve {}", [event.params.reserve.toHexString()])
+       log.error("Token Address {}", [tokenAddress])
+
+
+       //some old tokens like DAI, MKR and MOVI have names and symbols in bytes rather than string
+       if(tokenAddress == Address.fromString('0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359').toHex()){
+         entity.tokenName = "Dai"
+         entity.tokenSymbol = "DAI"
+       } else if(tokenAddress == Address.fromString('0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2').toHex()){
+         entity.tokenName = "Maker"
+         entity.tokenSymbol = "MKR"
+
+       } else if (tokenAddress == Address.fromString('0x623B925b0A57a24EA8dE301F2E3E692cE903f0c3').toHex()){
+         entity.tokenName = "MoviToken"
+         entity.tokenSymbol = "MOVI"
+
+       }else{
+           let tokenContract = ERC20.bind(result2.value.value1)
+           let nameOfToken = tokenContract.try_name()
+           let symbolOfToken = tokenContract.try_symbol()
+           if (nameOfToken.reverted) {
+             log.error("nameOfToken reverted {}", [result2.value.value1.toHexString()])
+           } else {
+             entity.tokenName = nameOfToken.value.toString()
+             log.error("Token Name {}", [nameOfToken.value.toString()])
+           }
+           if (symbolOfToken.reverted) {
+             log.error("symbolOfToken reverted {}", [result2.value.value1.toHexString()])
+           } else {
+             entity.tokenSymbol = symbolOfToken.value.toString()
+             log.error("Token Symbol {}", [symbolOfToken.value.toString()])
+           }
+
+       }
+
+       OrderbookReserveTemplate.create(event.params.reserve)
+
+    entity.save()
+    //kyberReservesEntity.reserves = entity
+    kyberReservesEntity.save()
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count.plus(BigInt.fromI32(1))
-
-  // Entity fields can be set based on event parameters
-  entity.reserveAddress = event.params.reserve
-
-  //KyberReserve.create(event.params.reserve)
-
-  //let contract1 = KyberReserve.bind(event.params.reserve)
-  let contract2 = OrderbookReserve.bind(event.params.reserve)
-  //let contract3 = Contract3.bind(event.params.contractAddress)
-
-  //let result1 = contract1.try_conversionRatesContract()
-  let result2 = contract2.try_contracts()
-  //let result3 = contract3.try_thirdFunction(...)
-
-  // if (result1.reverted) {
-  //   log.error("result1 reverted {}", [])
-  // } else {
-  //   log.error("result1 value", [event.params.reserve.toString()])
-  // }
-
-  if (result2.reverted) {
-    log.error("result2 reverted", [])
-  } else {
-    log.error("result2 value {}", [])
-  }
-
-
-  //let kyberReserve = KyberReserve.bind(event.params.reserve)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  //contract.getReserves()
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
 }
 
 export function handleListReservePairs(event: ListReservePairs): void {
 
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = getListReserves.load(event.transaction.from.toHex())
-
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new getListReserves(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
-  }
-
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count.plus(BigInt.fromI32(1))
-
-  // Entity fields can be set based on event parameters
-  entity.source = event.params.src
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
+  // // Entities can be loaded from the store using a string ID; this ID
+  // // needs to be unique across all entities of the same type
+  // let entity = getListReserves.load(event.transaction.from.toHex())
+  //
+  // // Entities only exist after they have been saved to the store;
+  // // `null` checks allow to create entities on demand
+  // if (entity == null) {
+  //   entity = new getListReserves(event.transaction.from.toHex())
+  //
+  //   // Entity fields can be set using simple assignments
+  //   entity.count = BigInt.fromI32(0)
+  // }
+  //
+  // // BigInt and BigDecimal math are supported
+  // entity.count = entity.count.plus(BigInt.fromI32(1))
+  //
+  // // Entity fields can be set based on event parameters
+  // entity.source = event.params.src
+  //
+  // // Entities can be written to the store with `.save()`
+  // entity.save()
 }
 
 export function handleKyberTrade(event: KyberTrade): void {
@@ -132,26 +158,26 @@ export function handleKyberTrade(event: KyberTrade): void {
 
 export function handleEtherReceival(event: EtherReceival): void {
 
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = getEtherReceival.load(event.transaction.from.toHex())
-
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (entity == null) {
-    entity = new getEtherReceival(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
-  }
-
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count.plus(BigInt.fromI32(1))
-
-  // Entity fields can be set based on event parameters
-  entity.sender = event.params.sender
-  entity.amount = event.params.amount
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
+  // // Entities can be loaded from the store using a string ID; this ID
+  // // needs to be unique across all entities of the same type
+  // let entity = getEtherReceival.load(event.transaction.from.toHex())
+  //
+  // // Entities only exist after they have been saved to the store;
+  // // `null` checks allow to create entities on demand
+  // if (entity == null) {
+  //   entity = new getEtherReceival(event.transaction.from.toHex())
+  //
+  //   // Entity fields can be set using simple assignments
+  //   entity.count = BigInt.fromI32(0)
+  // }
+  //
+  // // BigInt and BigDecimal math are supported
+  // entity.count = entity.count.plus(BigInt.fromI32(1))
+  //
+  // // Entity fields can be set based on event parameters
+  // entity.sender = event.params.sender
+  // entity.amount = event.params.amount
+  //
+  // // Entities can be written to the store with `.save()`
+  // entity.save()
 }

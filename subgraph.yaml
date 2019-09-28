@@ -57,6 +57,7 @@ dataSources:
         - ListReservePairs
         # - KyberTrade
         - EtherReceival
+        - kyberReserves
       abis:
         - name: KyberNetwork
           file: ./abis/KyberNetwork.json
@@ -64,13 +65,17 @@ dataSources:
           file: ./abis/KyberReserve.json
         - name: OrderbookReserve
           file: ./abis/OrderbookReserve.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20_bytes32
+          file: ./abis/ERC20_bytes32.json
       eventHandlers:
         - event: AddReserveToNetwork(indexed address,bool,bool)
           handler: handleAddReserveToNetwork
-        - event: ListReservePairs(indexed address,address,address,bool)
-          handler: handleListReservePairs
-        - event: EtherReceival(indexed address,uint256)
-          handler: handleEtherReceival
+        # - event: ListReservePairs(indexed address,address,address,bool)
+        #   handler: handleListReservePairs
+        # - event: EtherReceival(indexed address,uint256)
+        #   handler: handleEtherReceival
         # - event: KyberTrade(indexed address,address,address,uint256,uint256,address,uint256,address,address,bytes)
         #   handler: handleKyberTrade
       file: ./src/KyberNetwork.ts
@@ -111,3 +116,11 @@ templates:
       eventHandlers:
         - event: TokenDeposited(indexed address,uint256)
           handler: handleTokenDeposited
+        - event: EtherDeposited(indexed address,uint256)
+          handler: handleEtherDeposited
+        - event: FullOrderTaken(address,uint32,bool)
+          handler: handleFullOrderTaken
+        - event: PartialOrderTaken(address,uint32,bool,bool)
+          handler: handlePartialOrderTaken
+        - event: OrderbookReserveTrade(address,address,uint256,uint256)
+          handler: handleOrderbookReserveTrade
