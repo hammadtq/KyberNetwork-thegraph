@@ -1,8 +1,10 @@
-type kyberReserve @entity {
+type Kyber @entity {
     id: ID! # Reserve Address
-    reserveCount: Int!
-    kyberTotalTokenDeposited: BigDecimal
-    kyberTotalEtherDeposited: BigDecimal
+    permissionlessReserveCount: Int!
+    permissionlessTotalTokenDeposited: BigDecimal
+    permissionlessTotalEtherDeposited: BigDecimal
+    permissionlessReserveTrades: Int
+    kyberTotalTrades: Int
 }
 
 type tokenReserve @entity {
@@ -13,4 +15,25 @@ type tokenReserve @entity {
   startTime: Int
   totalTokenDeposited: BigDecimal
   totalEtherDeposited: BigDecimal
+}
+
+type orderBookReserveTrade @entity {
+  id: ID!
+  tradeTime: Int
+  sourceToken: Bytes
+  destinationToken: Bytes
+  sourceAmount: BigInt
+  destinationAmount: BigInt
+}
+
+type allKyberTrade @entity {
+  id: ID!
+  tradeTime: Int
+  trader: Bytes
+  sourceToken: Bytes
+  destinationToken: Bytes
+  sourceAmount: BigInt
+  destinationAmount: BigInt
+  destinationAddress: Bytes
+  ethWeiValue: BigInt
 }

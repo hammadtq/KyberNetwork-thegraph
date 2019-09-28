@@ -14,41 +14,32 @@ import { ERC20 } from "../generated/KyberNetwork/ERC20"
 import { ERC20_bytes32 } from "../generated/KyberNetwork/ERC20_bytes32"
 import { OrderbookReserve as OrderbookReserveTemplate } from "../generated/templates"
 import {
-  kyberReserve,
-  tokenReserve
+  Kyber,
+  tokenReserve,
+  allKyberTrade
 } from "../generated/schema"
 
 export function handleAddReserveToNetwork(event: AddReserveToNetwork): void {
 
 
   if(event.params.isPermissionless){
-    // log.error(
-    //   'I am in the AddReserveToNetwork {}{}{}',
-    //   [
-    //     event.block.number.toString(),       // "47596000"
-    //     event.block.hash.toHexString(),      // "0x..."
-    //     event.transaction.hash.toHexString() // "0x..."
-    //   ]
-    // )
-    // Entities can be loaded from the store using a string ID; this ID
-    // needs to be unique across all entities of the same type
 
-    let kyberReservesEntity = kyberReserve.load('1')
+    let kyberReservesEntity = Kyber.load('1')
 
 
     if (kyberReservesEntity == null) {
-      kyberReservesEntity = new kyberReserve('1')
+      kyberReservesEntity = new Kyber('1')
       // Entity fields can be set using simple assignments
-      kyberReservesEntity.reserveCount = 0
-      kyberReservesEntity.kyberTotalTokenDeposited = BigDecimal.fromString('0')
-      kyberReservesEntity.kyberTotalEtherDeposited = BigDecimal.fromString('0')
+      kyberReservesEntity.permissionlessReserveCount = 0
+      kyberReservesEntity.permissionlessTotalTokenDeposited = BigDecimal.fromString('0')
+      kyberReservesEntity.permissionlessTotalEtherDeposited = BigDecimal.fromString('0')
+      kyberReservesEntity.kyberTotalTrades = 0
+      kyberReservesEntity.permissionlessReserveTrades = 0
     }
-    kyberReservesEntity.reserveCount = kyberReservesEntity.reserveCount + 1
+    kyberReservesEntity.permissionlessReserveCount = kyberReservesEntity.permissionlessReserveCount + 1
 
 
     let entity = tokenReserve.load(event.params.reserve.toHexString())
-
-
     if (entity == null) {
       entity = new tokenReserve(event.params.reserve.toHexString())
       entity.startTime = event.block.timestamp.toI32()
@@ -107,6 +98,34 @@ export function handleAddReserveToNetwork(event: AddReserveToNetwork): void {
 
 }
 
+export function handleKyberTrade(event: KyberTrade): void {
+  let kyberReservesEntity = Kyber.load('1')
+  if (kyberReservesEntity == null) {
+    kyberReservesEntity = new Kyber('1')
+    // Entity fields can be set using simple assignments
+    kyberReservesEntity.permissionlessReserveCount = 0
+    kyberReservesEntity.permissionlessTotalTokenDeposited = BigDecimal.fromString('0')
+    kyberReservesEntity.permissionlessTotalEtherDeposited = BigDecimal.fromString('0')
+    kyberReservesEntity.kyberTotalTrades = 0
+    kyberReservesEntity.permissionlessReserveTrades = 0
+  }
+  kyberReservesEntity.kyberTotalTrades = kyberReservesEntity.kyberTotalTrades + 1
+  kyberReservesEntity.save()
+
+  let allKyberTradeEntity = new allKyberTrade(event.transaction.from.toHex())
+
+  allKyberTradeEntity.tradeTime = event.block.timestamp.toI32()
+  allKyberTradeEntity.trader = event.params.trader
+  allKyberTradeEntity.sourceToken = event.params.src
+  allKyberTradeEntity.destinationToken = event.params.dest
+  allKyberTradeEntity.sourceAmount = event.params.srcAmount
+  allKyberTradeEntity.destinationAmount = event.params.dstAmount
+  allKyberTradeEntity.destinationAddress = event.params.destAddress
+  allKyberTradeEntity.ethWeiValue = event.params.ethWeiValue
+
+  allKyberTradeEntity.save()
+}
+
 export function handleListReservePairs(event: ListReservePairs): void {
 
   // // Entities can be loaded from the store using a string ID; this ID
@@ -132,29 +151,7 @@ export function handleListReservePairs(event: ListReservePairs): void {
   // entity.save()
 }
 
-export function handleKyberTrade(event: KyberTrade): void {
-  // // Entities can be loaded from the store using a string ID; this ID
-  // // needs to be unique across all entities of the same type
-  // let entity = getKyberTrades.load(event.transaction.from.toHex())
-  //
-  // // Entities only exist after they have been saved to the store;
-  // // `null` checks allow to create entities on demand
-  // if (entity == null) {
-  //   entity = new getKyberTrades(event.transaction.from.toHex())
-  //
-  //   // Entity fields can be set using simple assignments
-  //   entity.count = BigInt.fromI32(0)
-  // }
-  //
-  // // BigInt and BigDecimal math are supported
-  // entity.count = entity.count.plus(BigInt.fromI32(1))
-  //
-  // // Entity fields can be set based on event parameters
-  // entity.traderAddress = event.params.trader
-  //
-  // // Entities can be written to the store with `.save()`
-  // entity.save()
-}
+
 
 export function handleEtherReceival(event: EtherReceival): void {
 

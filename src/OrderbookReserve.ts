@@ -9,7 +9,8 @@ import {
 } from "../generated/templates/OrderbookReserve/OrderbookReserve"
 import {
   tokenReserve,
-  kyberReserve
+  Kyber,
+  orderBookReserveTrade
 } from "../generated/schema"
 
 export function handleTokenDeposited(event: TokenDeposited): void {
@@ -18,8 +19,8 @@ export function handleTokenDeposited(event: TokenDeposited): void {
   entity.totalTokenDeposited = entity.totalTokenDeposited.plus(event.params.amount.toBigDecimal())
   entity.save()
 
-  let kyberReservesEntity = kyberReserve.load('1')
-  kyberReservesEntity.kyberTotalTokenDeposited = kyberReservesEntity.kyberTotalTokenDeposited.plus(event.params.amount.toBigDecimal())
+  let kyberReservesEntity = Kyber.load('1')
+  kyberReservesEntity.permissionlessTotalTokenDeposited = kyberReservesEntity.permissionlessTotalTokenDeposited.plus(event.params.amount.toBigDecimal())
   kyberReservesEntity.save()
 
   log.error(
@@ -33,12 +34,13 @@ export function handleTokenDeposited(event: TokenDeposited): void {
 }
 
 export function handleEtherDeposited(event: EtherDeposited): void {
+
   let entity = tokenReserve.load(event.address.toHex())
   entity.totalEtherDeposited = entity.totalEtherDeposited.plus(event.params.amount.toBigDecimal())
   entity.save()
 
-  let kyberReservesEntity = kyberReserve.load('1')
-  kyberReservesEntity.kyberTotalEtherDeposited = kyberReservesEntity.kyberTotalEtherDeposited.plus(event.params.amount.toBigDecimal())
+  let kyberReservesEntity = Kyber.load('1')
+  kyberReservesEntity.permissionlessTotalEtherDeposited = kyberReservesEntity.permissionlessTotalEtherDeposited.plus(event.params.amount.toBigDecimal())
   kyberReservesEntity.save()
 
   log.error(
@@ -74,6 +76,22 @@ export function handlePartialOrderTaken(event: PartialOrderTaken): void {
 }
 
 export function handleOrderbookReserveTrade(event: OrderbookReserveTrade): void {
+
+  let kyberReservesEntity = Kyber.load('1')
+  kyberReservesEntity.permissionlessReserveTrades = kyberReservesEntity.permissionlessReserveTrades + 1
+  kyberReservesEntity.save()
+
+  let orderBookReserveTradeEntity = new orderBookReserveTrade(event.transaction.from.toHex())
+
+  orderBookReserveTradeEntity.tradeTime = event.block.timestamp.toI32()
+  orderBookReserveTradeEntity.sourceToken = event.params.srcToken
+  orderBookReserveTradeEntity.destinationToken = event.params.dstToken
+  orderBookReserveTradeEntity.sourceAmount = event.params.srcAmount
+  orderBookReserveTradeEntity.destinationAmount = event.params.dstAmount
+
+
+  orderBookReserveTradeEntity.save()
+
   log.error(
     'I am in the OrderbookReserveTrade {}{}{}',
     [
